@@ -1,15 +1,16 @@
 # Slygolds' Retime Tool
 
 # File: retime.py
-# Version: 1.0
+# Version: 1.0.2
 # Author: Knuutti
-# Date: August 2nd 2022
+# Date: August 3rd 2022
 
 import tkinter as tk
 import pyperclip
 import math
 import webbrowser
 
+# Function for parsing the time frame from the debug info
 def getFrame(frame):
     try:
         frame = frame.split("cmt\": \"")[1]
@@ -20,6 +21,7 @@ def getFrame(frame):
 
     return timeFrame
 
+# Function for calculating and forming the total time
 def calculateTotal(startTime, endTime):
 
     totalTime = endTime - startTime
@@ -30,25 +32,7 @@ def calculateTotal(startTime, endTime):
     totalSeconds = int(math.floor(totalTime - (3600 * totalHours) - (60 * totalMinutes)))
     totalMilliseconds = math.floor(1000 * (totalTime - (3600 * totalHours) - (60 * totalMinutes) - totalSeconds))
 
-    # Formating the time string
-    if totalSeconds < 10:
-        total = "{0}m 0{1}s".format(totalMinutes, totalSeconds)
-    else:
-        total = "{0}m {1}s".format(totalMinutes, totalSeconds)
-
-    if totalHours > 0:
-        total = "{0}h ".format(totalHours) + total
-    
-    totalNoMs = total
-
-    if totalMilliseconds >= 100:
-        total = total + " {0}ms".format(totalMilliseconds)
-    elif totalMilliseconds >= 10:
-        total = total + " 0{0}ms".format(totalMilliseconds)
-    else:
-        total = total + " 00{0}ms".format(totalMilliseconds)
-
-    totalNoAdjustment = total
+    totalNoAdjustment = formatTimes(totalHours, totalMinutes, totalSeconds, totalMilliseconds)
 
     # Adjustments for 60 fps format
     firstDigit = math.floor(totalMilliseconds / 100)
@@ -57,9 +41,23 @@ def calculateTotal(startTime, endTime):
         secondDigit = secondDigit + 1
     elif (secondDigit == 9):
         secondDigit = 0
+        firstDigit = firstDigit + 1
 
-    total60fps = totalNoMs + f" {firstDigit}{secondDigit}ms"
+    if firstDigit == 10:
+        firstDigit = 0
+        totalSeconds = totalSeconds + 1
 
+    if totalSeconds == 60:
+        totalSeconds = 0
+        totalMinutes = totalMinutes + 1
+
+    if totalMinutes == 60:
+        totalMinutes = 0
+        totalHours = totalHours + 1
+
+    totalMilliseconds = firstDigit * 100 + secondDigit * 10
+
+    total60fps = formatTimes(totalHours, totalMinutes, totalSeconds, totalMilliseconds)
 
     # Adjustments for 30 fps format
     if (secondDigit == 1):
@@ -68,25 +66,61 @@ def calculateTotal(startTime, endTime):
         secondDigit = 6
     elif (secondDigit == 8):
         secondDigit = 0
+        firstDigit = firstDigit + 1
 
-    total30fps = totalNoMs + f" {firstDigit}{secondDigit}ms"
+    if firstDigit == 10:
+        firstDigit = 0
+        totalSeconds = totalSeconds + 1
+
+    if totalSeconds == 60:
+        totalSeconds = 0
+        totalMinutes = totalMinutes + 1
+
+    if totalMinutes == 60:
+        totalMinutes = 0
+        totalHours = totalHours + 1
+        
+    totalMilliseconds = firstDigit * 100 + secondDigit * 10
+
+    total30fps = formatTimes(totalHours, totalMinutes, totalSeconds, totalMilliseconds)
 
     times = [totalNoAdjustment, total60fps, total30fps]
 
     return times
 
+def formatTimes(h, m, s, ms):
+    if s < 10:
+        formattedTime = "{0}m 0{1}s".format(m, s)
+    else:
+        formattedTime = "{0}m {1}s".format(m, s)
+
+    if h > 0:
+        formattedTime = "{0}h ".format(h) + formattedTime
+
+    if ms >= 100:
+        formattedTime = formattedTime + " {0}ms".format(ms)
+    elif ms >= 10:
+        formattedTime = formattedTime + " 0{0}ms".format(ms)
+    else:
+        formattedTime = formattedTime + " 00{0}ms".format(ms)
+
+    return formattedTime
+
+# Button command for updating the start frame
 def pasteStartFrame():
     startFrame = getFrame(pyperclip.paste())
     if startFrame != "":
         lblStartFrame.configure(text = startFrame)
         checkData()
 
+# Button command for updating the end frame
 def pasteEndFrame():
     endFrame = getFrame(pyperclip.paste())
     if endFrame != "":
         lblEndFrame.configure(text = endFrame)
         checkData()
 
+# Method for checking if start and end frames are okay for calculating
 def checkData():
     if (lblStartFrame.cget("text") != "" and lblEndFrame.cget("text") != ""):
         total = calculateTotal(lblStartFrame.cget("text"), lblEndFrame.cget("text"))
@@ -94,6 +128,7 @@ def checkData():
         lblTotalTime60fps.config(text = total[1])
         lblTotalTime30fps.config(text = total[2])
 
+# Button command for opening SlyGolds website
 def openSlygolds():
     webbrowser.open("https://slygolds.com")
 
@@ -106,16 +141,16 @@ window.configure(background = '#121a22')
 window.iconbitmap(r"favicon.ico")
 
 # Defining the widgets
-lblStartFrame = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
-lblEndFrame = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
+lblStartFrame = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
+lblEndFrame = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
 btnStartFrame = tk.Button(window, text = "Paste start frame", font = "Calibri 12 bold", command = pasteStartFrame, background = '#085097', foreground = 'white', width = 15)
 btnEndFrame = tk.Button(window, text = "Paste end frame", font = "Calibri 12 bold", command = pasteEndFrame, background = '#085097', foreground = 'white', width = 15)
 lblTotalTimeTitle60fps = tk.Label(window, text = "60 fps:", font = "Calibri 12 bold", anchor = 'e', width = 15, background = '#121a22', foreground = 'white')
-lblTotalTime60fps = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
+lblTotalTime60fps = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
 lblTotalTimeTitle30fps = tk.Label(window, text = "30 fps:", font = "Calibri 12 bold", anchor = 'e', width = 15, background = '#121a22', foreground = 'white')
-lblTotalTime30fps = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
+lblTotalTime30fps = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
 lblTotalTimeTitle = tk.Label(window, text = "Total:", font = "Calibri 12 bold", anchor = 'e', width = 15, background = '#121a22', foreground = 'white')
-lblTotalTime = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
+lblTotalTime = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
 frmBorder1 = tk.Frame(window, height = 10, background = '#121a22')
 frmBorder2 = tk.Frame(window, height = 30, background = '#121a22')
 frmBorder3 = tk.Frame(window, height = 20, background = '#121a22')
@@ -139,3 +174,5 @@ btnWebsite.grid(row = 8, column = 0, columnspan = 3, sticky = 'ew')
 
 # Mainloop
 window.mainloop()
+
+# eof
