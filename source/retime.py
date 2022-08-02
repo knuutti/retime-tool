@@ -103,7 +103,7 @@ window.title('SlyGolds\' Retime Tool')
 window.resizable(0, 0)
 window.attributes('-topmost', True) # Always on top
 window.configure(background = '#121a22')
-window.iconbitmap(r"C:\Users\eknut\AppData\Local\Programs\Python\Python310\Scripts\Retime Tool\favicon.ico")
+window.iconbitmap(r"favicon.ico")
 
 # Defining the widgets
 lblStartFrame = tk.Label(window, font = "Calibri 15", width = 15, background = 'white')
