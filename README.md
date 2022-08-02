@@ -1,8 +1,8 @@
-# SlyGolds' Retime Tool
+# Knuutti's Retime Tool
 
 This is a tool for timing speedruns. You can use this tool to get accurate segment times from Youtube videos.
 
-![image](https://user-images.githubusercontent.com/96994953/182455063-59a4902d-7564-4d01-9285-fa3740cb0c04.png)
+![image](https://user-images.githubusercontent.com/96994953/182496344-26c148c8-7830-46a4-9a78-bfcd27791883.png)
 
 ### Opening the program
 - Download the [latest version](https://github.com/Knuutti/Retime-Tool/releases/latest)
