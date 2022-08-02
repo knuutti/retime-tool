@@ -1,7 +1,7 @@
-# Slygolds' Retime Tool
+# Knuutti's Retime Tool
 
 # File: retime.py
-# Version: 1.0.2
+# Version: 1.0.3
 # Author: Knuutti
 # Date: August 3rd 2022
 
@@ -128,13 +128,9 @@ def checkData():
         lblTotalTime60fps.config(text = total[1])
         lblTotalTime30fps.config(text = total[2])
 
-# Button command for opening SlyGolds website
-def openSlygolds():
-    webbrowser.open("https://slygolds.com")
-
 # Configuring the window
 window = tk.Tk()
-window.title('SlyGolds\' Retime Tool')
+window.title('Knuutti\'s Retime Tool')
 window.resizable(0, 0)
 window.attributes('-topmost', True) # Always on top
 window.configure(background = '#121a22')
@@ -153,8 +149,7 @@ lblTotalTimeTitle = tk.Label(window, text = "Total:", font = "Calibri 12 bold", 
 lblTotalTime = tk.Label(window, font = "Calibri 15", width = 20, background = 'white')
 frmBorder1 = tk.Frame(window, height = 10, background = '#121a22')
 frmBorder2 = tk.Frame(window, height = 30, background = '#121a22')
-frmBorder3 = tk.Frame(window, height = 20, background = '#121a22')
-btnWebsite = tk.Button(window, text = "Visit website", font = "Calibri 10 bold", command = openSlygolds, background = '#243447', foreground = 'white')
+frmBorder3 = tk.Frame(window, height = 10, background = '#121a22')
 
 # Configuring the grid
 frmBorder1.grid(row = 0, column = 0, columnspan = 4, sticky = 'ew')
@@ -170,7 +165,6 @@ lblTotalTime60fps.grid(row = 5, column = 1, columnspan = 2, padx = 20, pady = 5)
 lblTotalTimeTitle30fps.grid(row = 6, column = 0, padx = 10)
 lblTotalTime30fps.grid(row = 6, column = 1, columnspan = 2, padx = 10, pady = 5)
 frmBorder3.grid(row = 7, column = 0, columnspan = 3, sticky = 'ew')
-btnWebsite.grid(row = 8, column = 0, columnspan = 3, sticky = 'ew')
 
 # Mainloop
 window.mainloop()
