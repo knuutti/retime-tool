@@ -27,10 +27,11 @@ def calculateTotal(startTime, endTime):
     totalTime = endTime - startTime
 
     # Separating time into hours, minutes, seconds and milliseconds
-    totalHours = int(math.floor(totalTime / 3600))
-    totalMinutes = int(math.floor((totalTime - (3600 * totalHours)) / 60))
-    totalSeconds = int(math.floor(totalTime - (3600 * totalHours) - (60 * totalMinutes)))
-    totalMilliseconds = math.floor(1000 * (totalTime - (3600 * totalHours) - (60 * totalMinutes) - totalSeconds))
+    totalHours = math.floor(totalTime / 3600)
+    totalMinutes = math.floor((totalTime - (3600 * totalHours)) / 60)
+    totalSecondsMs = round(totalTime - (3600 * totalHours) - (60 * totalMinutes), 3) # string with seconds and milliseconds, separated on the next two lines
+    totalSeconds = int(f"{totalSecondsMs}".split(".")[0])
+    totalMilliseconds = int(f"{totalSecondsMs}".split(".")[1])
 
     totalNoAdjustment = formatTimes(totalHours, totalMinutes, totalSeconds, totalMilliseconds)
 
