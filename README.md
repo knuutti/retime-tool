@@ -1,6 +1,6 @@
 # Knuutti's Retime Tool
 
-This is a tool for timing speedruns. You can use this tool to get accurate segment times from Youtube videos.
+This is a tool for timing speedruns, segments or anything that involves frame counts. You can use this tool to get accurate segment times from Youtube videos using the "Copy debug info" feature.
 
 ![retime-tool-preview](https://user-images.githubusercontent.com/96994953/182962357-faab915a-0334-4698-b4be-17e0be61af2e.png)
 
