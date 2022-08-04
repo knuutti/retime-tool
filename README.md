@@ -6,7 +6,7 @@ This is a tool for timing speedruns. You can use this tool to get accurate segme
 
 ### Opening the program
 - Download the [latest version](https://github.com/Knuutti/Retime-Tool/releases/latest)
-- Extract the file and open the retime tool!
+- Extract the file and open the retime tool
 
 
 ### Using the program
