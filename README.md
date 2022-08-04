@@ -14,4 +14,4 @@ You can either fill the start and end frames manually or by using the debug info
 
 FPS and Modifier fields are for adjusting the total time. Changing the FPS will change how the program rounds the total time. Modifier field can be used to add/subtract certain amount of time from the total time. 
 
-SlyGolds field below the total time will show the total time in 60 FPS standards, when seconds are rounded up to two decimals. This field can be used when submitting golds to [SlyGolds](https://slygolds.com/home).
+SlyGolds field below the total time will show the total time in 60 FPS standards rounded down to two decimals. This field can be used when submitting golds to [SlyGolds](https://slygolds.com/home).
