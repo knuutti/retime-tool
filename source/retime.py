@@ -1,14 +1,12 @@
 # Knuutti's Retime Tool
 
 # File: retime.py
-# Version: 1.0.3
 # Author: Knuutti
 # Date: August 3rd 2022
 
 import tkinter as tk
 import pyperclip
 import math
-import webbrowser
 
 # Function for parsing the time frame from the debug info
 def getFrame(frame):
