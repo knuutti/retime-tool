@@ -1,9 +1,9 @@
 # Knuutti's Retime Tool
-# Version: 1.1.0
+# Version: 1.1.1
 
 # File: retime.py
 # Author: Knuutti
-# Date: August 5th 2022
+# Date: August 14th 2022
 
 import tkinter as tk
 import pyperclip
@@ -65,6 +65,16 @@ def calculateTotal(startTime, endTime, modifier, fps):
         totalMilliseconds = totalMilliseconds / 1000
 
         totalMilliseconds = 1000 * round(videoFpsDecimal * (round(totalMilliseconds / videoFpsDecimal)), 3)
+
+        if (totalMilliseconds == 1000):
+            totalMilliseconds = 0
+            totalSeconds = totalSeconds + 1
+            if (totalSeconds == 60):
+                totalSeconds = 0
+                totalMinutes = totalMinutes + 1
+                if (totalMinutes == 60):
+                    totalMinutes = 0
+                    totalHours = totalHours + 1
 
         total = [
             formatTimes(digit, totalHours, totalMinutes, totalSeconds, totalMilliseconds), 
