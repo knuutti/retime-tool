@@ -66,6 +66,7 @@ def calculateTotal(startTime, endTime, modifier, fps):
 
         totalMilliseconds = 1000 * round(videoFpsDecimal * (round(totalMilliseconds / videoFpsDecimal)), 3)
 
+        # Checks if fps-adjusted ms rounds up to a whole second
         if (totalMilliseconds == 1000):
             totalMilliseconds = 0
             totalSeconds = totalSeconds + 1
