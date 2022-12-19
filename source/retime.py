@@ -1,291 +1,183 @@
-# Knuutti's Retime Tool
-# Version: 1.1.1
-
-# File: retime.py
-# Author: Knuutti
-# Date: August 14th 2022
-
-import tkinter as tk
+from tkinter import *
 import pyperclip
-import math
+import calculate
+import parse
+import format
 
-# Function for parsing the time frame from the debug info
-def getFrame(frame):
-    try:
-        frame = frame.split("cmt\": \"")[1]
-        timeFrame = float(frame.split("\"")[0])
-    
-    except Exception:
-        timeFrame = ""
+def main():
 
-    return timeFrame
+    def paste_start_frame():
 
-# Function for calculating and forming the total time
-def calculateTotal(startTime, endTime, modifier, fps):
+        paste_frame(start_cmt, start_frame)
 
-    try:
-        totalTime = float(endTime) - float(startTime)
-    except Exception:
-        return ""
+        return
 
-    if modifier != "":
-        division = modifier.split("/")
-        if len(division) < 2:
-            numerator = division[0]
-            denominator = 1
+    def paste_end_frame():
+
+        paste_frame(end_cmt, end_frame)
+        
+        return
+
+    def paste_frame(cmt, frame):
+        clipboard = pyperclip.paste()
+
+        if clipboard.isnumeric():
+
+            frame_value = int(clipboard)
+            frame.set(frame_value)
+            cmt.set(frame.get() / fps.get())
+
         else:
-            numerator = division[0]
-            denominator = division[1]
 
-        try:
-            totalTime = totalTime + (float(numerator) / float(denominator))
-        except Exception:
-            totalTime = totalTime
+            cmt.set(parse.parse_cmt(clipboard))
+            frame.set(calculate.getFrame(cmt.get(), fps.get()))
 
-    if totalTime < 0:
-        digit = "- "
-        totalTime = -1 * totalTime
-    else:
-        digit = ""
+        update_values()
 
-    # Separating time into hours, minutes, seconds and milliseconds
-    totalHours = math.floor(totalTime / 3600)
-    totalMinutes = math.floor((totalTime - (3600 * totalHours)) / 60)
-    totalSecondsMs = round(totalTime - (3600 * totalHours) - (60 * totalMinutes), 3) # string with seconds and milliseconds, separated on the next two lines
-    totalSeconds = int(f"{totalSecondsMs}".split(".")[0])
-    totalMilliseconds = 1000 * float("0." + f"{totalSecondsMs}".split(".")[1])
+        return
 
-    slygoldsTime = formatSlygolds(totalHours, totalMinutes, totalSeconds, totalMilliseconds)
+    def update_values(*args):
 
-    # Adjusting milliseconds for video FPS
-    try:
-        videoFps = int(fps)
-        videoFpsDecimal = float(1 / videoFps)
+        modifier_value = parse.get_modifier_value(modifier.get())
 
-        totalMilliseconds = totalMilliseconds / 1000
+        start_frame.set(calculate.getFrame(start_cmt.get(), fps.get()))
+        end_frame.set(calculate.getFrame(end_cmt.get(), fps.get()))
 
-        totalMilliseconds = 1000 * round(videoFpsDecimal * (round(totalMilliseconds / videoFpsDecimal)), 3)
+        total_time.set((end_frame.get()-start_frame.get())/fps.get() + modifier_value)
+        total_time_label.config(text=format.format_total_time(total_time.get()))
+        slygolds_time_label.config(text=format.format_slygolds_time(total_time.get()))
 
-        # Checks if fps-adjusted ms rounds up to a whole second
-        if (totalMilliseconds == 1000):
-            totalMilliseconds = 0
-            totalSeconds = totalSeconds + 1
-            if (totalSeconds == 60):
-                totalSeconds = 0
-                totalMinutes = totalMinutes + 1
-                if (totalMinutes == 60):
-                    totalMinutes = 0
-                    totalHours = totalHours + 1
+        return
 
-        total = [
-            formatTimes(digit, totalHours, totalMinutes, totalSeconds, totalMilliseconds), 
-            slygoldsTime]
+    # Clear all the data (except FPS)
+    def clear_all():
+        start_frame.set(0)
+        end_frame.set(0)
+        modifier.set('')
+        start_cmt.set(.0)
+        end_cmt.set(.0)
 
-    except Exception:
-        total = [
-            formatTimes(digit, totalHours, totalMinutes, totalSeconds, totalMilliseconds), 
-            slygoldsTime]
+        update_values()
 
-    return total
+        return
 
-# Function for creating a string for displaying the total time
-def formatTimes(d, h, m, s, ms):
-    if s < 10:
-        formattedTime = "{0}m 0{1}s".format(m, s)
-    else:
-        formattedTime = "{0}m {1}s".format(m, s)
 
-    if h > 0:
-        formattedTime = "{0}h ".format(h) + formattedTime
+    # Configuring the window
+    window = Tk()
+    window.title('Speedrun Retime Tool')
+    window.resizable(0,0)
+    window.attributes('-topmost', True) # window always on top
+    window.configure(background = '#121a22')
+    #window.iconbitmap(r'slygolds.ico')
 
-    if ms >= 100:
-        formattedTime = formattedTime + " {0}ms".format(round(ms))
-    elif ms >= 10:
-        formattedTime = formattedTime + " 0{0}ms".format(round(ms))
-    elif ms > 0:
-        formattedTime = formattedTime + " 00{0}ms".format(round(ms))
+    window.bind_all('<1>', lambda event:event.widget.focus_set()) # entries lose focus when clicked elsewhere
 
-    formattedTime = d + formattedTime
+    fps_options = [
+        25,
+        30,
+        50,
+        60
+        # TODO 
+        # could make this to read values from 
+        # settings file instead of hard coding
+    ]
+    start_frame = IntVar()
+    start_cmt = DoubleVar()
+    end_frame = IntVar()
+    end_cmt = DoubleVar()
+    fps = IntVar()
+    modifier = StringVar()
+    total_time = DoubleVar()
 
-    return formattedTime
+    # Defining the variables
+    start_frame.set(0)
+    end_frame.set(0)
+    fps.set(60) 
+    modifier.set('')
 
-# Function for making Slygolds format for total time
-def formatSlygolds(h, m, s, ms):
+    # Whenever a value changes, update the total time
+    fps.trace_add('write', update_values)
+    modifier.trace_add('write', update_values)
 
-    msFirst = math.floor(ms / 100)
+    # Defining the FPS selection widget (dropdown menu)
+    fps_dropdown_menu = OptionMenu(window, fps, *fps_options)
+    fps_dropdown_menu.configure(font='Calibri 15', border=0, indicatoron=0, width=5, background='white', height=1)
 
-    msSecond = int(math.floor(ms / 10) - (10 * msFirst))
+    # Defining start/end frame labels
+    start_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT, textvariable=start_frame)
+    end_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT, textvariable=end_frame)
 
-    if (msSecond == 2 or msSecond == 4 or msSecond == 7):
-        msSecond = msSecond + 1
-    elif (msSecond == 9):
-        msFirst = msFirst + 1
-        msSecond = 0
-        if (msFirst == 10):
-            msFirst = 0
-            s = s + 1
-            if (s == 60):
-                s = 0
-                m = m + 1
-                if (m == 60):
-                    m = 0
-                    h = h + 1
-    
-    slygoldsMS = f"{msFirst}{msSecond}"
+    # Defining modifier entry
+    modifier_entry = Entry(window, width=10, font='Calibri 15', background='white', justify=CENTER, textvariable=modifier)
 
-    if h > 0:
-        if h < 10:
-            slygoldsH = "0" + f"{h}:"
-        else:
-            slygoldsH = f"{h}:"
-    else:
-        slygoldsH = ""
+    # Defining headers for different sections
+    start_frame_header_label = Label(window, text = 'START FRAME', font = 'Calibri 15 bold', width = 12, background = '#1e2b3a', foreground = 'white', relief=SUNKEN)
+    end_frame_header_label = Label(window, text = 'END FRAME', font = 'Calibri 15 bold', width = 12, background = '#1e2b3a', foreground = 'white', relief=SUNKEN)
+    fps_header_label = Label(window, text = 'FPS', font = 'Calibri 15 bold', width = 12, background = '#1e2b3a', foreground = 'white', relief=SUNKEN)
+    modifier_header_label = Label(window, text = 'MODIFIER', font = 'Calibri 15 bold', width = 12, background = '#1e2b3a', foreground = 'white', relief=SUNKEN)
+    total_time_header_label = Label(window, text='TOTAL TIME', background='#1e2b3a', font='Calibri 15 bold', foreground='white', relief=SUNKEN)
+    total_time_label = Label(window, background='white', font='Calibri 30', foreground='black', borderwidth=10, text='0m 00s')
+    slygolds_header_label = Label(window, text = 'SLYGOLDS', font = 'Calibri 15 bold', width = 12, background = '#955707', foreground = 'white', relief=SUNKEN)
+    slygolds_time_label = Label(window, font = 'Calibri 15', width = 12, background = 'white', text='00:00.00')
 
-    if m > 0:
-        if m < 10:
-            slygoldsM = "0" + f"{m}:"
-        else:
-            slygoldsM = f"{m}:"
-    else:
-        slygoldsM = "00:"
+    # Defining some extra frames to make the window look nice UwU
+    empty_frame1 = Frame(window, height = 10, background = '#121a22')
+    empty_frame2 = Frame(window, height = 10, background = '#121a22')
+    empty_frame3 = Frame(window, height = 10, background = '#121a22')
+    empty_frame4 = Frame(window, height = 10, background = '#121a22')
+    empty_frame5 = Frame(window, height = 10, background = '#121a22')
+    empty_frame6 = Frame(window, height = 10, background = '#121a22')
 
-    if s > 0:
-        if s < 10:
-            slygoldsS = "0" + f"{s}."
-        else:
-            slygoldsS = f"{s}."
-    else:
-        slygoldsS = "00."
+    # Buttons
+    start_frame_button = Button(window, text = 'PASTE', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=paste_start_frame)
+    end_frame_button = Button(window, text = 'PASTE', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=paste_end_frame)
+    slygolds_button = Button(window, text = 'COPY', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8)
+    clear_all_button = Button(window, text = 'CLEAR ALL', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=clear_all)
 
-    slygoldsTime = slygoldsH + slygoldsM + slygoldsS + slygoldsMS
+    ### PACKING WIDGETS INTO THE GRID ###
 
-    return slygoldsTime
+    empty_frame1.grid(row=1, column=1, sticky='ew')
 
-# Button command for updating the start frame
-def pasteStartFrame():
-    startFrame = getFrame(pyperclip.paste())
-    if startFrame != "":
-        entStartFrame.delete(0, tk.END)
-        entStartFrame.insert(0, startFrame)
-        checkData()
+    fps_header_label.grid(row=2, column=1, padx=7, pady=3, ipadx=5, ipady=5)
+    fps_dropdown_menu.grid(row=2, column=2, padx=7, pady=3)
+    modifier_header_label.grid(row=2, column=3, padx=7, pady=3, ipadx=5, ipady=5)
+    modifier_entry.grid(row=2, column=4, padx=7, pady=7, ipady=5)
 
-# Button command for updating the end frame
-def pasteEndFrame():
-    endFrame = getFrame(pyperclip.paste())
-    if endFrame != "":
-        entEndFrame.delete(0, tk.END)
-        entEndFrame.insert(0, endFrame)
-        checkData()
+    empty_frame2.grid(row=3)
 
-def copyTime():
-    pyperclip.copy(lblTotalTime.cget("text"))
+    start_frame_header_label.grid(row=4, column=1, padx=7, pady=3, ipadx=5, ipady=5)
+    start_frame_label.grid(row=4, column=2, columnspan=2, padx=7, pady=3, ipadx=5, ipady=5)
+    start_frame_button.grid(row=4, column=4, padx=7, pady=3, sticky='ew')
+    end_frame_header_label.grid(row=5,column=1, padx=7, pady=3, ipadx=5, ipady=5)
+    end_frame_label.grid(row=5, column=2, columnspan=2, padx=7, pady=3, ipadx=5, ipady=5)
+    end_frame_button.grid(row=5, column=4, padx=7, pady=3, sticky='ew')
 
-def copySlygolds():
-    pyperclip.copy(lblSlygoldsTime.cget("text"))
+    empty_frame3.grid(row=6, column=1)
 
-# Method for checking if start and end frames are okay for calculating
-def checkData(*args):
-    if (entStartFrame.get() != "" and entEndFrame.get() != ""):
-        total = calculateTotal(entStartFrame.get(), entEndFrame.get(), entModifier.get(), entFps.get())
-        if total != "":
-            lblTotalTime.config(text = total[0])
-            lblSlygoldsTime.config(text = total[1])
-    else:
-        lblTotalTime.config(text = "")
-        lblSlygoldsTime.config(text = "")
+    total_time_header_label.grid(row=7, column=1, columnspan=4, sticky='ew', padx=7, pady=3)
+    total_time_label.grid(row=8, column=1, columnspan=4, sticky='ew', padx=8, pady=3, ipadx=5, ipady=5)
 
-# Button command for clearing data
-def clearData():
-    entStartFrame.delete(0, tk.END)
-    entEndFrame.delete(0, tk.END)
-    entFps.delete(0, tk.END)
-    entModifier.delete(0, tk.END)
-    checkData()
+    empty_frame4.grid(row=9, column=1)
 
-# Configuring the window
-window = tk.Tk()
-window.title('Knuutti\'s Retime Tool')
-window.resizable(0, 0)
-window.attributes('-topmost', True) # Always on top
-window.configure(background = '#121a22')
-window.iconbitmap(r"favicon.ico")
+    if True:
+        # TODO
+        # Add option in settings file to disable showing this section
+        slygolds_header_label.grid(row=10,column=1, padx=7, pady=3, ipadx=5, ipady=5)
+        slygolds_time_label.grid(row=10,column=2,columnspan=2, padx=7, pady=3, ipadx=5, ipady=5, sticky='ew')
+        slygolds_button.grid(row=10,column=4, padx=7, pady=3, sticky='ew')
+        empty_frame5.grid(row=11,column=1)
 
-# Defining variables
-varStartFrame = tk.DoubleVar()
-varEndFrame = tk.DoubleVar()
-varFPS = tk.DoubleVar()
-varModifier = tk.DoubleVar()
+    clear_all_button.grid(row=12,column=1,columnspan=4, sticky='ew', padx=7, pady=3)
 
-# Defining the widgets
-entStartFrame = tk.Entry(window, font = "Calibri 15", width = 20, background = 'white', textvariable = varStartFrame)
-entEndFrame = tk.Entry(window, font = "Calibri 15", width = 20, background = 'white', textvariable = varEndFrame)
+    empty_frame6.grid(row=13, column=1)
 
-btnStartFrame = tk.Button(window, text = "Paste debug info", font = "Calibri 12 bold", command = pasteStartFrame, background = '#085097', foreground = 'white', width = 15)
-btnEndFrame = tk.Button(window, text = "Paste debug info", font = "Calibri 12 bold", command = pasteEndFrame, background = '#085097', foreground = 'white', width = 15)
-btnClear = tk.Button(window,  text = "Clear", font = "Calibri 12 bold", command = clearData, background = '#085097', foreground = 'white', width = 20)
-btnCopyTime = tk.Button(window, text = "Copy", font = "Calibri 12 bold", command = copyTime, background = '#085097', foreground = 'white', width = 6)
-btnCopySlygolds = tk.Button(window, text = "Copy", font = "Calibri 12 bold", command = copySlygolds, background = '#085097', foreground = 'white', width = 6)
 
-lblTotalTimeTitle = tk.Label(window, text = "Total", font = "Calibri 12 bold", width = 12, background = '#1e2b3a', foreground = 'white', relief=tk.SUNKEN)
-lblSlygoldsTimeTitle = tk.Label(window, text = "SlyGolds", font = "Calibri 12 bold", width = 12, background = '#955707', foreground = 'white', relief=tk.SUNKEN)
-lblModifierTitle = tk.Label(window, text = "Modifier", font = "Calibri 12 bold", width = 12, background = '#1e2b3a', foreground = 'white', relief=tk.SUNKEN)
-lblStartTitle = tk.Label(window, text = "Start frame", font = "Calibri 12 bold", width = 12, background = '#1e2b3a', foreground = 'white', relief=tk.SUNKEN)
-lblEndTitle = tk.Label(window, text = "End frame", font = "Calibri 12 bold", width = 12, background = '#1e2b3a', foreground = 'white', relief=tk.SUNKEN)
-lblFpsTitle = tk.Label(window, text = "FPS", font = "Calibri 12 bold", width = 12, background = '#1e2b3a', foreground = 'white', relief=tk.SUNKEN)
+    ### MAINLOOP ###
+    window.mainloop()
 
-lblTotalTime = tk.Label(window, font = "Calibri 15", width = 27, background = 'white')
-lblSlygoldsTime = tk.Label(window, font = "Calibri 15", width = 27, background = 'white')
-
-entModifier = tk.Entry(window, font = "Calibri 15", width = 20, background = 'white', textvariable = varModifier)
-entFps = tk.Entry(window, font = "Calibri 15", width = 20, background = 'white', textvariable = varFPS)
-
-frmBorder1 = tk.Frame(window, height = 10, background = '#121a22')
-frmBorder2 = tk.Frame(window, height = 30, background = '#121a22')
-frmBorder3 = tk.Frame(window, height = 10, background = '#121a22')
-frmBorder4 = tk.Frame(window, height = 10, background = '#121a22')
-
-clearData()
-
-# Configuring the grid
-frmBorder1.grid(row = 0, column = 0, columnspan = 4, sticky = 'ew')
-
-lblStartTitle.grid(row = 1, column = 0, ipady = 3, padx = 7, pady = 3)
-entStartFrame.grid(row = 1, column = 1)
-btnStartFrame.grid(row = 1, column = 2, padx = 7)
-
-lblEndTitle.grid(row = 2, column = 0, ipady = 3, padx = 7, pady = 3)
-entEndFrame.grid(row = 2, column = 1)
-btnEndFrame.grid(row = 2, column = 2, padx = 7)
-
-lblFpsTitle.grid(row = 3, column = 0, ipady = 3, padx = 7, pady = 3)
-entFps.grid(row = 3, column = 1)
-
-lblModifierTitle.grid(row = 4, column = 0, ipady = 3, padx = 7, pady = 3)
-entModifier.grid(row = 4, column = 1)
-
-btnClear.grid(row = 5, column = 1, sticky = 'ew', pady = 10)
-
-frmBorder2.grid(row = 6, column = 0, columnspan = 4, sticky = 'ew')
-
-lblTotalTimeTitle.grid(row = 7, column = 0, ipady = 3)
-lblTotalTime.grid(row = 7, column = 1, columnspan = 2, sticky = 'w', pady = 5)
-btnCopyTime.grid(row = 7, column = 2, padx = 7, sticky = 'se', pady = 3, ipady = 1)
-
-lblSlygoldsTimeTitle.grid(row = 8, column = 0, ipady = 3)
-lblSlygoldsTime.grid(row = 8, column = 1, columnspan = 2, sticky = 'w', pady = 5)
-btnCopySlygolds.grid(row = 8, column = 2, padx = 7, sticky = 'se', pady = 3, ipady = 1)
-
-frmBorder3.grid(row = 10, column = 0, columnspan = 3, sticky = 'ew')
-
-# Entry updates
-varStartFrame.trace("w", checkData)
-varEndFrame.trace("w", checkData)
-varFPS.trace("w", checkData)
-varModifier.trace("w", checkData)
-
-# Mainloop
-window.mainloop()
+    return
 
 
 
-# eof 
+if __name__ == '__main__':
+    main()    
