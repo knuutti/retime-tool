@@ -36,6 +36,12 @@ def main():
 
         return
 
+    def copy_slygold():
+        
+        pyperclip.copy(slygolds_time_label.cget('text'))
+        
+        return
+
     def update_values(*args):
 
         modifier_value = parse.get_modifier_value(modifier.get())
@@ -131,7 +137,7 @@ def main():
     # Buttons
     start_frame_button = Button(window, text = 'PASTE', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=paste_start_frame)
     end_frame_button = Button(window, text = 'PASTE', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=paste_end_frame)
-    slygolds_button = Button(window, text = 'COPY', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8)
+    slygolds_button = Button(window, text = 'COPY', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=copy_slygold)
     clear_all_button = Button(window, text = 'CLEAR ALL', font = 'Calibri 15 bold', background = '#085097', foreground = 'white', width = 8, command=clear_all)
 
     ### PACKING WIDGETS INTO THE GRID ###
