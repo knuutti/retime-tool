@@ -1,6 +1,8 @@
 import math
 
 def get_time_parametres(time: float):
+
+    time = abs(time)
     
     hours = math.floor(time / 3600)
     minutes = math.floor((time - (3600 * hours)) / 60)
@@ -13,6 +15,11 @@ def get_time_parametres(time: float):
 def format_total_time(time: float):
 
     times = get_time_parametres(time)
+
+    if time < 0:
+        d = '-'
+    else:
+        d = ''
 
     h = times[0]
     m = times[1]
@@ -34,13 +41,18 @@ def format_total_time(time: float):
     elif ms > 0:
         formatted_time = formatted_time + " 00{0}ms".format(round(ms))
 
-    return formatted_time
+    return d + formatted_time
 
 
 
 def format_slygolds_time(time: float):
 
     times = get_time_parametres(time)
+
+    if time < 0:
+        d = '-'
+    else:
+        d = ''
 
     h = times[0]
     m = times[1]
@@ -92,6 +104,6 @@ def format_slygolds_time(time: float):
     else:
         slygoldsS = "00."
 
-    slygolds_time = slygoldsH + slygoldsM + slygoldsS + slygoldsMS
+    slygolds_time = d + slygoldsH + slygoldsM + slygoldsS + slygoldsMS
 
     return slygolds_time
