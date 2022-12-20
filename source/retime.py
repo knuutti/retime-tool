@@ -44,21 +44,40 @@ def main():
 
     def update_values(*args):
 
-        modifier_value = parse.get_modifier_value(modifier.get())
+        # One of the frames is missing
+        if start_frame.get() == -1 or end_frame.get() == -1:
+            slygolds_time_label.config(text='-')
+            total_time_label.config(text='-')
 
-        start_frame.set(calculate.getFrame(start_cmt.get(), fps.get()))
-        end_frame.set(calculate.getFrame(end_cmt.get(), fps.get()))
+            if start_frame.get() == -1:
+                start_frame_label.config(text='-')
+            else:
+                start_frame_label.config(text=start_frame.get())
+            if end_frame.get() == -1:
+                end_frame_label.config(text='-')
+            else:
+                end_frame_label.config(text=end_frame.get())
 
-        total_time.set((end_frame.get()-start_frame.get())/fps.get() + modifier_value)
-        total_time_label.config(text=format.format_total_time(total_time.get()))
-        slygolds_time_label.config(text=format.format_slygolds_time(total_time.get()))
+        # Computing the total time
+        else:
+            modifier_value = parse.get_modifier_value(modifier.get())
+
+            start_frame.set(calculate.getFrame(start_cmt.get(), fps.get()))
+            start_frame_label.config(text=start_frame.get())
+
+            end_frame.set(calculate.getFrame(end_cmt.get(), fps.get()))
+            end_frame_label.config(text=end_frame.get())
+
+            total_time.set((end_frame.get()-start_frame.get())/fps.get() + modifier_value)
+            total_time_label.config(text=format.format_total_time(total_time.get()))
+            slygolds_time_label.config(text=format.format_slygolds_time(total_time.get()))
 
         return
 
     # Clear all the data (except FPS)
     def clear_all():
-        start_frame.set(0)
-        end_frame.set(0)
+        start_frame.set(-1)
+        end_frame.set(-1)
         modifier.set('')
         start_cmt.set(.0)
         end_cmt.set(.0)
@@ -96,8 +115,8 @@ def main():
     total_time = DoubleVar()
 
     # Defining the variables
-    start_frame.set(0)
-    end_frame.set(0)
+    start_frame.set(-1)
+    end_frame.set(-1)
     fps.set(60) 
     modifier.set('')
 
@@ -110,8 +129,8 @@ def main():
     fps_dropdown_menu.configure(font='Calibri 15', border=0, indicatoron=0, width=5, background='white', height=1)
 
     # Defining start/end frame labels
-    start_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT, textvariable=start_frame)
-    end_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT, textvariable=end_frame)
+    start_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT)
+    end_frame_label = Label(window, font='Calibri 15', width=20, background='white', justify=LEFT)
 
     # Defining modifier entry
     modifier_entry = Entry(window, width=10, font='Calibri 15', background='white', justify=CENTER, textvariable=modifier)
@@ -177,6 +196,7 @@ def main():
 
     empty_frame6.grid(row=13, column=1)
 
+    update_values()
 
     ### MAINLOOP ###
     window.mainloop()
