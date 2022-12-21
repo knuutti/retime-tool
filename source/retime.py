@@ -30,7 +30,7 @@ def main():
         else:
 
             cmt.set(parse.parse_cmt(clipboard))
-            frame.set(calculate.getFrame(cmt.get(), fps.get()))
+            frame.set(calculate.get_frame(cmt.get(), fps.get()))
 
         update_values()
 
@@ -62,10 +62,10 @@ def main():
         else:
             modifier_value = parse.get_modifier_value(modifier.get())
 
-            start_frame.set(calculate.getFrame(start_cmt.get(), fps.get()))
+            start_frame.set(calculate.get_frame(start_cmt.get(), fps.get()))
             start_frame_label.config(text=start_frame.get())
 
-            end_frame.set(calculate.getFrame(end_cmt.get(), fps.get()))
+            end_frame.set(calculate.get_frame(end_cmt.get(), fps.get()))
             end_frame_label.config(text=end_frame.get())
 
             total_time.set((end_frame.get()-start_frame.get())/fps.get() + modifier_value)
